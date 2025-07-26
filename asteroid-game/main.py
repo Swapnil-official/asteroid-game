@@ -1,4 +1,9 @@
 import pygame
+from player import Player
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
+
+import sys
 
 # from database import connect_database, databse_version
 
@@ -14,8 +19,20 @@ def main():
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    clk = pygame.time.Clock
+    clk = pygame.time.Clock()
     dt = 0
+
+    updatable = pygame.sprite.Group()
+    drawable = pygame.sprite.Group()
+
+    asteroids = pygame.sprite.Group()
+
+    Player.containers = (updatable, drawable)
+    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = updatable
+
+    player = Player(x=SCREEN_WIDTH / 2, y=SCREEN_HEIGHT / 2)
+    asteroidField = AsteroidField()
 
     while True:
 
@@ -25,15 +42,24 @@ def main():
 
         screen.fill("black")
 
+        updatable.update(dt=dt)
+
+        for obj in asteroids:
+            if player.collide(obj):
+                print("Game Over!")
+                sys.exit("Game Over!")
+
+        # player.draw(screen=screen)
+
+        for drawable_object in drawable:
+            drawable_object.draw(screen=screen)
+
+        # player.update(dt=dt)
+
         pygame.display.flip()
 
-        delta = clk().tick(60)
-
-        print(delta)
-
-        dt = delta / 1000
-
-        print(dt)
+        # limit frame rate to 60
+        dt = clk.tick(60) / 1000
 
 
 if __name__ == "__main__":
